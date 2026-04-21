@@ -1,0 +1,89 @@
+# ─────────────────────────────────────────────────
+# GUARDIANOPS — GitHub Actions CI/CD Pipeline
+# Triggers automatically on every push to main
+# Builds Docker image → pushes to ECR → deploys to EKS
+# ─────────────────────────────────────────────────
+name: Deploy GuardianOps
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:       # allows manual trigger from GitHub UI
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REGISTRY: 713890439968.dkr.ecr.us-east-1.amazonaws.com
+  ECR_REPOSITORY: guardianops
+  EKS_CLUSTER: guardianops-cluster
+
+jobs:
+  deploy:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+    # ── Step 1: Get the code ──────────────────────
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    # ── Step 2: Connect to AWS ────────────────────
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    # ── Step 3: Login to ECR ──────────────────────
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
+
+    # ── Step 4: Build & push Docker image ─────────
+    - name: Build, tag, and push image to ECR
+      id: build-image
+      run: |
+        # Build the Docker image
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:${{ github.sha }} ./app
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest ./app
+
+        # Push both tags — commit SHA for traceability, latest for convenience
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:${{ github.sha }}
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+
+        echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:${{ github.sha }}" >> $GITHUB_OUTPUT
+
+    # ── Step 5: Connect to Kubernetes cluster ─────
+    - name: Update kubeconfig for EKS
+      run: |
+        aws eks update-kubeconfig \
+          --region $AWS_REGION \
+          --name $EKS_CLUSTER
+
+    # ── Step 6: Deploy to Kubernetes ─────────────
+    - name: Deploy to EKS
+      run: |
+        # Apply all Kubernetes manifests
+        kubectl apply -f infrastructure/kubernetes/configmap.yaml
+        kubectl apply -f infrastructure/kubernetes/deployment.yaml
+        kubectl apply -f infrastructure/kubernetes/service.yaml
+
+        # Update the deployment to use the new image
+        kubectl set image deployment/guardianops \
+          guardianops=$ECR_REGISTRY/$ECR_REPOSITORY:${{ github.sha }}
+
+        # Wait for rollout to complete
+        kubectl rollout status deployment/guardianops --timeout=300s
+
+    # ── Step 7: Verify deployment ─────────────────
+    - name: Verify deployment
+      run: |
+        echo "=== Pods ==="
+        kubectl get pods -l app=guardianops
+
+        echo "=== Service ==="
+        kubectl get service guardianops-service
+
+        echo "=== Deployment ==="
+        kubectl get deployment guardianops

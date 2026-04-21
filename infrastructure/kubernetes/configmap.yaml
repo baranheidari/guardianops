@@ -1,0 +1,16 @@
+# ─────────────────────────────────────────────────
+# GUARDIANOPS — ConfigMap
+# Stores non-secret configuration
+# App reads these as environment variables
+# ─────────────────────────────────────────────────
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: guardianops-config
+  namespace: default
+data:
+  APP_NAME: "GuardianOps"
+  APP_VERSION: "1.0"
+  AWS_REGION: "us-east-1"
+  ECR_REGISTRY: "713890439968.dkr.ecr.us-east-1.amazonaws.com"
+  LOG_LEVEL: "INFO"

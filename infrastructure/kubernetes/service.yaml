@@ -1,0 +1,25 @@
+# ─────────────────────────────────────────────────
+# GUARDIANOPS — Kubernetes Service
+# Creates a stable internal address for the app
+# The load balancer will send traffic here
+# ─────────────────────────────────────────────────
+apiVersion: v1
+kind: Service
+metadata:
+  name: guardianops-service
+  namespace: default
+  labels:
+    app: guardianops
+  annotations:
+    # Tell AWS to create an internet-facing load balancer
+    service.beta.kubernetes.io/aws-load-balancer-type: "external"
+    service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
+spec:
+  type: LoadBalancer             # AWS creates an ALB automatically
+  selector:
+    app: guardianops             # send traffic to pods with this label
+  ports:
+  - name: http
+    protocol: TCP
+    port: 80                     # external port (what users access)
+    targetPort: 5000             # internal port (what Flask runs on)

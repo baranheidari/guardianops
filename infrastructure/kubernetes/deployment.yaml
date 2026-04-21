@@ -1,0 +1,64 @@
+# ─────────────────────────────────────────────────
+# GUARDIANOPS — Kubernetes Deployment
+# Tells Kubernetes: run my app, keep 2 replicas alive
+# If one crashes, restart it automatically
+# ─────────────────────────────────────────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: guardianops
+  namespace: default
+  labels:
+    app: guardianops
+    version: v1
+spec:
+  replicas: 2                    # run 2 copies simultaneously
+  selector:
+    matchLabels:
+      app: guardianops
+  strategy:
+    type: RollingUpdate          # update one pod at a time (zero downtime)
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: guardianops
+        version: v1
+    spec:
+      containers:
+      - name: guardianops
+        image: 713890439968.dkr.ecr.us-east-1.amazonaws.com/guardianops:v1
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5000
+          name: http
+        # Health checks — Kubernetes pings these to know if app is alive
+        livenessProbe:           # is the app running?
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 10
+          periodSeconds: 30
+          failureThreshold: 3
+        readinessProbe:          # is the app ready to receive traffic?
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        # Resource limits — prevents one app from eating all memory
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"          # 100 millicores = 0.1 CPU
+          limits:
+            memory: "256Mi"
+            cpu: "500m"          # max 0.5 CPU
+        # Environment variables
+        env:
+        - name: FLASK_ENV
+          value: "production"
+        - name: AWS_DEFAULT_REGION
+          value: "us-east-1"

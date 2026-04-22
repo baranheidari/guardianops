@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Security Events — GuardianOps{% endblock %}
+{% block nav_events %}active{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Security Events <span class="badge-live">{{ events|length }} Total</span></h1>
+    <p>{{ ext_count }} external IPs &nbsp;|&nbsp; {{ int_count }} internal IPs &nbsp;|&nbsp; All timestamps UTC</p>
+</div>
+
+<div class="card">
+    <div class="card-title">Legend</div>
+    <div class="legend">
+        <span class="sev CRITICAL">CRITICAL</span>
+        <span class="sev HIGH">HIGH</span>
+        <span class="sev MEDIUM">MEDIUM</span>
+        <span class="sev LOW">LOW</span>
+        <span class="legend-sep">|</span>
+        <span class="st st-ab">Auto-Blocked</span>
+        <span class="st st-inv">Investigating</span>
+        <span class="st st-res">Resolved</span>
+        <span class="legend-sep">|</span>
+        <span class="ip-tag ext">EXT</span><span style="font-size:0.78rem;color:#8892a4;margin-left:4px">External IP</span>
+        <span class="ip-tag int" style="margin-left:10px">INT</span><span style="font-size:0.78rem;color:#8892a4;margin-left:4px">Internal IP</span>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-title">All Security Events</div>
+    <table>
+        <thead><tr>
+            <th>#</th><th>Timestamp</th><th>Source IP</th>
+            <th>Event Type</th><th>Severity</th><th>Status</th><th>Region</th>
+        </tr></thead>
+        <tbody>
+        {% for e in events %}
+        <tr>
+            <td>{{ e.id }}</td>
+            <td style="color:#8892a4;font-size:0.8rem">{{ e.timestamp }}</td>
+            <td>
+                <span class="{{ 'ip-ext' if e.ip_type == 'external' else 'ip-int' }}">{{ e.source_ip }}</span>
+                <span class="ip-tag {{ 'ext' if e.ip_type == 'external' else 'int' }}">{{ 'EXT' if e.ip_type == 'external' else 'INT' }}</span>
+            </td>
+            <td>{{ e.event_type }}</td>
+            <td><span class="sev {{ e.severity }}">{{ e.severity }}</span></td>
+            <td>
+                {% if e.status == 'Auto-Blocked' %}<span class="st st-ab">{{ e.status }}</span>
+                {% elif e.status == 'Investigating' %}<span class="st st-inv">{{ e.status }}</span>
+                {% else %}<span class="st st-res">{{ e.status }}</span>{% endif %}
+            </td>
+            <td style="color:#8892a4">{{ e.region }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

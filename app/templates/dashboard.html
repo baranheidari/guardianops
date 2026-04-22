@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — GuardianOps{% endblock %}
+{% block nav_dashboard %}active{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Security Dashboard <span class="badge-live">LIVE</span></h1>
+    <p>AI-Powered Cloud Security Platform — us-east-1 &nbsp;|&nbsp; Last updated: {{ ts }}</p>
+</div>
+
+<div class="stats">
+    <div class="stat c"><div class="stat-num">{{ critical }}</div><div class="stat-lbl">Critical Threats</div></div>
+    <div class="stat h"><div class="stat-num">{{ high }}</div><div class="stat-lbl">High Severity</div></div>
+    <div class="stat m"><div class="stat-num">{{ medium }}</div><div class="stat-lbl">Medium Severity</div></div>
+    <div class="stat b"><div class="stat-num">{{ blocked }}</div><div class="stat-lbl">Auto-Blocked</div></div>
+</div>
+
+<div class="status-bar">
+    <div class="dot"></div>
+    <div>
+        <h3>All Systems Operational</h3>
+        <p>AWS EKS v1.30 &nbsp;—&nbsp; 2 pods healthy &nbsp;—&nbsp; Load Balancer active &nbsp;—&nbsp; {{ total }} events monitored</p>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-title">Recent Security Events</div>
+    <table>
+        <thead><tr>
+            <th>#</th><th>Timestamp</th><th>Source IP</th>
+            <th>Event Type</th><th>Severity</th><th>Status</th><th>Region</th>
+        </tr></thead>
+        <tbody>
+        {% for e in recent %}
+        <tr>
+            <td>{{ e.id }}</td>
+            <td style="color:#8892a4;font-size:0.8rem">{{ e.timestamp }}</td>
+            <td>
+                <span class="{{ 'ip-ext' if e.ip_type == 'external' else 'ip-int' }}">{{ e.source_ip }}</span>
+                <span class="ip-tag {{ 'ext' if e.ip_type == 'external' else 'int' }}">{{ 'EXT' if e.ip_type == 'external' else 'INT' }}</span>
+            </td>
+            <td>{{ e.event_type }}</td>
+            <td><span class="sev {{ e.severity }}">{{ e.severity }}</span></td>
+            <td>
+                {% if e.status == 'Auto-Blocked' %}<span class="st st-ab">{{ e.status }}</span>
+                {% elif e.status == 'Investigating' %}<span class="st st-inv">{{ e.status }}</span>
+                {% else %}<span class="st st-res">{{ e.status }}</span>{% endif %}
+            </td>
+            <td style="color:#8892a4">{{ e.region }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <div class="view-all"><a href="/events">View all {{ total }} events →</a></div>
+</div>
+
+<div class="card">
+    <div class="card-title">Quick Access</div>
+    <div class="api-grid">
+        <div class="api-card">
+            <h3>Security Events</h3>
+            <div class="ep">GET /events</div>
+            <p>Full event log with IP classification, severity badges, and status tracking.</p>
+            <a href="/events" class="btn btn-green">View Page →</a>
+        </div>
+        <div class="api-card">
+            <h3>Statistics</h3>
+            <div class="ep">GET /stats</div>
+            <p>KPIs, infrastructure metrics, and aggregated threat breakdown.</p>
+            <a href="/stats" class="btn btn-green">View Page →</a>
+        </div>
+        <div class="api-card">
+            <h3>Playbooks</h3>
+            <div class="ep">GET /playbooks</div>
+            <p>Remediation playbooks and one-click incident response actions.</p>
+            <a href="/playbooks" class="btn btn-green">View Page →</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

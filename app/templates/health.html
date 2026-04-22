@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Health — GuardianOps{% endblock %}
+{% block nav_health %}active{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>Health Check <span class="badge-live">Healthy</span></h1>
+    <p>System status as of {{ ts }}</p>
+</div>
+<div class="status-bar">
+    <div class="dot"></div>
+    <div><h3>All Systems Operational</h3><p>All services running normally on AWS EKS</p></div>
+</div>
+<div class="grid2">
+    <div class="card">
+        <div class="card-title">Application</div>
+        <div class="info-row"><span class="k">Service</span><span class="v v-green">guardianops</span></div>
+        <div class="info-row"><span class="k">Version</span><span class="v">6.0</span></div>
+        <div class="info-row"><span class="k">Status</span><span class="v v-green">Healthy</span></div>
+        <div class="info-row"><span class="k">Last Check</span><span class="v">{{ ts }}</span></div>
+        <div class="info-row"><span class="k">Events Monitored</span><span class="v v-green">{{ total }}</span></div>
+    </div>
+    <div class="card">
+        <div class="card-title">Kubernetes</div>
+        <div class="info-row"><span class="k">Cluster</span><span class="v v-green">guardianops-cluster</span></div>
+        <div class="info-row"><span class="k">Version</span><span class="v">EKS v1.30</span></div>
+        <div class="info-row"><span class="k">Pods</span><span class="v v-green">2 Running</span></div>
+        <div class="info-row"><span class="k">Replicas</span><span class="v v-green">2/2 Ready</span></div>
+        <div class="info-row"><span class="k">Nodes</span><span class="v v-green">2 x t3.medium</span></div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Statistics — GuardianOps{% endblock %}
+{% block nav_stats %}active{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>Statistics <span class="badge-live">Live</span></h1>
+    <p>Aggregated security metrics and infrastructure KPIs</p>
+</div>
+<div class="stats">
+    <div class="stat c"><div class="stat-num">{{ critical }}</div><div class="stat-lbl">Critical</div></div>
+    <div class="stat h"><div class="stat-num">{{ high }}</div><div class="stat-lbl">High</div></div>
+    <div class="stat m"><div class="stat-num">{{ medium }}</div><div class="stat-lbl">Medium</div></div>
+    <div class="stat b"><div class="stat-num">{{ low }}</div><div class="stat-lbl">Low</div></div>
+</div>
+<div class="card">
+    <div class="card-title">KPIs</div>
+    <div class="kpi-grid">
+        <div class="kpi"><div class="kpi-val">&lt;500ms</div><div class="kpi-lbl">Ingestion Latency (p95)</div></div>
+        <div class="kpi"><div class="kpi-val">&lt;1s</div><div class="kpi-lbl">Page Load</div></div>
+        <div class="kpi"><div class="kpi-val">100%</div><div class="kpi-lbl">Uptime</div></div>
+        <div class="kpi"><div class="kpi-val">-30%</div><div class="kpi-lbl">MTTD Improvement</div></div>
+    </div>
+</div>
+<div class="grid2">
+    <div class="card">
+        <div class="card-title">Threat Summary</div>
+        <div class="info-row"><span class="k">Total Events</span><span class="v">{{ total }}</span></div>
+        <div class="info-row"><span class="k">Auto-Blocked</span><span class="v v-green">{{ blocked }}</span></div>
+        <div class="info-row"><span class="k">Investigating</span><span class="v">{{ investigating }}</span></div>
+        <div class="info-row"><span class="k">Resolved</span><span class="v">{{ resolved }}</span></div>
+        <div class="info-row"><span class="k">External IPs</span><span class="v">{{ ext }}</span></div>
+        <div class="info-row"><span class="k">Internal IPs</span><span class="v v-green">{{ total - ext }}</span></div>
+    </div>
+    <div class="card">
+        <div class="card-title">Infrastructure</div>
+        <div class="info-row"><span class="k">Platform</span><span class="v v-green">AWS EKS v1.30</span></div>
+        <div class="info-row"><span class="k">Pods Running</span><span class="v v-green">2 / 2</span></div>
+        <div class="info-row"><span class="k">Nodes</span><span class="v v-green">2 x t3.medium</span></div>
+        <div class="info-row"><span class="k">Region</span><span class="v">us-east-1</span></div>
+        <div class="info-row"><span class="k">Load Balancer</span><span class="v v-green">Classic ELB Active</span></div>
+        <div class="info-row"><span class="k">Registry</span><span class="v v-green">AWS ECR</span></div>
+    </div>
+</div>
+{% endblock %}

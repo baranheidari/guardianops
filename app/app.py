@@ -1,6 +1,6 @@
-from flask import Flask, jsonify, render_template
+from flask import Flask, jsonify, render_template, send_from_directory
 import datetime
-from zoneinfo import ZoneInfo
+import os
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
 
@@ -26,35 +26,17 @@ def get_stats():
         "ext":          sum(1 for e in EVENTS if e["ip_type"]=="external"),
     }
 
-def now():
-    return datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=-4))).strftime("%Y-%m-%d %H:%M:%S EDT")
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(os.path.join(app.root_path, 'static'), 'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
 @app.route("/")
-def dashboard():
-    s = get_stats()
-    return render_template("dashboard.html", ts=now(), recent=EVENTS[-4:], **s)
-
-@app.route("/events")
-def events_page():
-    s = get_stats()
-    return render_template("events.html", events=EVENTS,
-        ext_count=s["ext"], int_count=s["total"]-s["ext"])
-
-@app.route("/stats")
-def stats_page():
-    return render_template("stats.html", ts=now(), **get_stats())
-
-@app.route("/playbooks")
-def playbooks_page():
-    return render_template("playbooks.html")
-
-@app.route("/health-ui")
-def health_ui():
-    return render_template("health.html", ts=now(), total=len(EVENTS))
+def index():
+    return send_from_directory(app.static_folder, "index.html")
 
 @app.route("/health")
 def health():
-    return jsonify({"status":"healthy","service":"guardianops","version":"6.0","events":len(EVENTS)})
+    return jsonify({"status":"healthy","service":"guardianops","version":"7.0","events":len(EVENTS)})
 
 @app.route("/api/events")
 def api_events():

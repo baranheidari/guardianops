@@ -29,7 +29,7 @@ spec:
     spec:
       containers:
       - name: guardianops
-        image: 713890439968.dkr.ecr.us-east-1.amazonaws.com/guardianops:v1
+        image: 713890439968.dkr.ecr.us-east-1.amazonaws.com/guardianops:v11
         imagePullPolicy: Always
         ports:
         - containerPort: 5000

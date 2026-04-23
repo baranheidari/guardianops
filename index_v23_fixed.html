@@ -2794,7 +2794,7 @@ const NAV_RESPOND = [{
   ico: "book",
   k: "P"
 }, {
-  id: "alerts",
+  id: "rules",
   name: "Alert rules",
   ico: "filter",
   k: "R"
@@ -2820,7 +2820,6 @@ const NAV_ADMIN = [{
   ico: "heart",
   k: "H"
 }];
-
 const ALL_NAV = [...NAV_PRIMARY, ...NAV_RESPOND, ...NAV_ADMIN];
 const App = () => {
   const [view, setViewRaw] = useState(() => localStorage.getItem("go-view") || "dashboard");
